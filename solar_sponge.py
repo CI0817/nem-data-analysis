@@ -1,76 +1,58 @@
 '''
-This script visualise the price trough caused by solar during the day.
-Focusing on data between 2025/01/01 and 2025/10/31 in Victoria.
+This script visualises the price trough caused by solar during the day.
+It plots the RRP (Regional Reference Price) for a specified time range in Victoria.
 '''
 
 import nemosis
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
+import matplotlib.dates as mdates
 
-# Download the data
-start_time = "2025/01/01 00:00:00"
-end_time = "2025/10/31 23:55:00"
-table = "DISPATCHPRICE"
-raw_data_cache = "./raw_data_cache"
+def plot_price(start_time, end_time):
+    # Download the price data
+    table = "DISPATCHPRICE"
+    raw_data_cache = "./raw_data_cache"
 
-price_data = nemosis.dynamic_data_compiler(start_time, end_time, table, raw_data_cache,
-                                            select_columns=['SETTLEMENTDATE', 'REGIONID','RRP'],
-                                            filter_cols=['REGIONID'], filter_values=[['VIC1']])
+    # Fetch data using NEMOSIS
+    price_data = nemosis.dynamic_data_compiler(start_time, end_time, table, raw_data_cache,
+                                                select_columns=['SETTLEMENTDATE', 'REGIONID','RRP'],
+                                                filter_cols=['REGIONID'], filter_values=[['VIC1']])
 
-# Convert the datetime column to pd datatime object for easy extraction
-price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'])
+    # Convert the datetime column to pd datatime object
+    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'])
 
-# Extract the 'HOUR' and 'MONTH' from the 'SETTLEMENTDATE'
-price_data['HOUR'] = price_data['SETTLEMENTDATE'].dt.hour
-price_data['MONTH'] = price_data['SETTLEMENTDATE'].dt.month
+    # Create a plot
+    plt.figure(figsize=(15, 6))
 
-def plot_average_price_by_months(months, data):
-    """
-    Plots average RRP by hour for the specified list of months.
-    """
-    num_plots = len(months)
-    
-    # distinct logic for single vs multiple plots
-    if num_plots == 1:
-        fig, axes = plt.subplots(1, 1, figsize=(10, 5))
-        axes = [axes] # Make it a list so we can loop over it identically
+    # Plot the RRP against time
+    plt.plot(price_data['SETTLEMENTDATE'], price_data['RRP'], color="orange", label="RRP (VIC1)")
+
+    # Format the plot based on date range (Single day vs Multi-day)
+    start_date_str = pd.Timestamp(start_time).strftime('%Y-%m-%d')
+    end_date_str = pd.Timestamp(end_time).strftime('%Y-%m-%d')
+
+    if start_date_str == end_date_str:
+        plt.title(f"Electricity Price (RRP) for VIC1 on {start_date_str}")
+        # Single Day: Tick every few hours, format as HH:MM
+        plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     else:
-        cols = 2
-        rows = math.ceil(num_plots / cols)
-        # Adjust figure height based on rows
-        fig, axes = plt.subplots(rows, cols, figsize=(12, 3 * rows), sharex=True, sharey=True)
-        axes = axes.flatten()
+        plt.title(f"Electricity Price (RRP) for VIC1 between {start_date_str} and {end_date_str}")
+        # Multi-Day: Force ticks to be exactly once per Day
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        plt.gcf().autofmt_xdate() # Rotate date labels
 
-    for i, month in enumerate(months):
-        ax = axes[i]
-        
-        # Filter and Group
-        monthly_data = data[data['MONTH'] == month]
-        avg_price = monthly_data.groupby('HOUR')['RRP'].mean()
-        
-        # Plot
-        avg_price.plot(kind="line", marker="o", color="orange", ax=ax)
-        
-        # Styling
-        ax.set_title(f"Month {month}")
-        ax.axhline(0, color="red", linestyle="--", linewidth=1)
-        ax.set_xlabel("")
-        ax.grid(True)
-
-    # Hide any unused subplots (e.g. if you plot 3 months in a 2x2 grid)
-    for j in range(i + 1, len(axes)):
-        axes[j].axis('off')
-
-    # Global Labels
-    fig.supylabel("Price ($/MWh)")
-    fig.supxlabel("Hour of Day (0-23)")
-    fig.suptitle(f"Average Spot Price in Victoria (Months: {months})")
-    
+    # General styling
+    plt.xlabel("Time")
+    plt.ylabel("Price ($/MWh)")
+    plt.xlim(pd.Timestamp(start_time), pd.Timestamp(end_time))
+    plt.axhline(0, color="red", linestyle="--", linewidth=1, label="Zero Price")
+    plt.grid(True, color='gray', alpha=0.3)
+    plt.legend()
     plt.show()
 
-plot_average_price_by_months([6], price_data)
-
-# plot_average_price_by_months([1, 3, 5], price_data)
-
-# plot_average_price_by_months(range(1, 11), price_data)
+if __name__ == "__main__":
+    start_time = "2025/06/10 00:00:00"
+    end_time = "2025/06/20 23:55:00"
+    plot_price(start_time, end_time)
