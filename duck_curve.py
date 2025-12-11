@@ -71,17 +71,24 @@ def plot_duck_curve(start_time, end_time):
     end_date_str = pd.Timestamp(end_time).strftime('%Y-%m-%d')
     if start_date_str == end_date_str:
         plt.title(f"Generation Mix for {target_region} on {start_date_str}")
+        # Single Day: Tick every few hours, format as HH:MM
+        plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     else:
         plt.title(f"Generation Mix for {target_region} between {start_date_str} and {end_date_str}")
+        # Multi-Day: Force ticks to be exactly once per Day, change the interval to be less frequent if needed
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=2))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        plt.gcf().autofmt_xdate() # Rotate date labels
     plt.xlabel("Time")
     plt.xlim(pd.Timestamp(start_time),pd.Timestamp(end_time))
     plt.ylabel("Generation (MW)")
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.legend(bbox_to_anchor=(1,1), title='Fuel Type', loc='upper left')
     plt.subplots_adjust(right=0.8)
     plt.show()
 
 if __name__ == "__main__":
     start_time = "2025/06/01 00:00:00"
-    end_time = "2025/06/02 23:55:00"
+    end_time = "2025/06/30 23:55:00"
     plot_duck_curve(start_time, end_time)
