@@ -38,8 +38,8 @@ def plot_price(start_time, end_time):
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     else:
         plt.title(f"Electricity Price (RRP) for VIC1 between {start_date_str} and {end_date_str}")
-        # Multi-Day: Force ticks to be exactly once per Day (interval=2 for spacing)
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=2))
+        # Multi-Day: Force ticks to be exactly once per Day
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         plt.gcf().autofmt_xdate() # Rotate date labels
 
