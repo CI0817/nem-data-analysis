@@ -48,11 +48,11 @@ def plot_price(start_time, end_time):
     plt.ylabel("Price ($/MWh)")
     plt.xlim(pd.Timestamp(start_time), pd.Timestamp(end_time))
     plt.axhline(0, color="red", linestyle="--", linewidth=1, label="Zero Price")
-    plt.grid(True)
+    plt.grid(True, color='gray', alpha=0.3)
     plt.legend()
     plt.show()
 
 if __name__ == "__main__":
-    start_time = "2025/06/01 00:00:00"
-    end_time = "2025/06/10 23:55:00"
+    start_time = "2025/06/10 00:00:00"
+    end_time = "2025/06/20 23:55:00"
     plot_price(start_time, end_time)
