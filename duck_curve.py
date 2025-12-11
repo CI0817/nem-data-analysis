@@ -1,5 +1,5 @@
 '''
-This script analyses the generation mix and how it changes on average throughout the day.
+This script plots the generation mix and how it changes on average throughout the day.
 '''
 
 import nemosis
@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.dates as mdates
 
 
-def plot_duck_curve(start_time, end_time):
+def plot_generation_mix(start_time, end_time):
     # Download the generation mix data from NEMOSIS
     scada_table = "DISPATCH_UNIT_SCADA"
     raw_data_cache = "./raw_data_cache"
@@ -77,7 +77,7 @@ def plot_duck_curve(start_time, end_time):
     else:
         plt.title(f"Generation Mix for {target_region} between {start_date_str} and {end_date_str}")
         # Multi-Day: Force ticks to be exactly once per Day, change the interval to be less frequent if needed
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=2))
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         plt.gcf().autofmt_xdate() # Rotate date labels
     plt.xlabel("Time")
@@ -91,4 +91,4 @@ def plot_duck_curve(start_time, end_time):
 if __name__ == "__main__":
     start_time = "2025/06/01 00:00:00"
     end_time = "2025/06/30 23:55:00"
-    plot_duck_curve(start_time, end_time)
+    plot_generation_mix(start_time, end_time)
