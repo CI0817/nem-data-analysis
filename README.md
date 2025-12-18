@@ -2,11 +2,11 @@
 
 This project aims to understand the data provided my AEMO in regards to the energy market in Australia using the [NEMOSIS library](https://github.com/UNSW-CEEM/NEMOSIS).
 
-## Solar Sponge - Analysing the average price by hour in a month
+## Solar Sponge - Analysing the average price by hour
 
 The goal is to visualise the price trough caused by solar during the day.
 
-From running the `plot_average_price_by_months` function in the `solar_sponge.py` script, we see that the price drops during the day between 6am to 3pm; this is known as the "duck curve" or the "solar sponge", in which there are an abundant amount of solar power generated during the day and less demand for electricity, leading to a drop in price.
+From running the `plot_price` function in the `solar_sponge.py` script, we see that the price drops during the day between 6am to 3pm; this is known as the "duck curve" or the "solar sponge", in which there are an abundant amount of solar power generated during the day and less demand for electricity, leading to a drop in price.
 
 Victoria has a lot of rooftop solar panels installed, meaning that each building are well-sustained during the day, so there is no need to purchase electricity from the grid. [[1]](https://www.solar.vic.gov.au/slashing-energy-bills-record-year-solar)
 
@@ -18,10 +18,10 @@ Additionally, if we look at the price by hour in June of 2025, we see that avera
 
 The goal is to visualise the generation mix and how it changes on average throughout the day.
 
-![Electricity Price (RRP) for VIC1 between 2025-06-01 and 2025-06-10](image.png)
-![Generation Mix for VIC1 between 2025-06-1 and 2025-06-10](image-4.png)
-![Electricity Price (RRP) for VIC1 between 2025-06-10 and 2025-06-20](image-6.png)
-![Generation Mix for VIC1 between 2025-06-10 and 2025-06-20](image-5.png)
+![Electricity Price (RRP) for VIC1 between 2025-06-01 and 2025-06-10](Figures/image.png)
+![Generation Mix for VIC1 between 2025-06-1 and 2025-06-10](Figures/image-4.png)
+![Electricity Price (RRP) for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-6.png)
+![Generation Mix for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-5.png)
 
 From the plots above, we can see a clear correlation between the generation mix and the spot price fluctuation. Looking back at the June 2025 case, in early June (6th to 10th), there was a strong wind power generation, and the RRP between that period were relatively low compared to the period before and after that. In addition, we also see a price jump on the evening of June 12th (entering June 13th), as the wind power was significantly low and since it was during nightime, there was no solar power to cover any loss.
 
