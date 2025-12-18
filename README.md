@@ -26,3 +26,7 @@ The goal is to visualise the generation mix and how it changes on average throug
 From the plots above, we can see a clear correlation between the generation mix and the spot price fluctuation. Looking back at the June 2025 case, in early June (6th to 10th), there was a strong wind power generation, and the RRP between that period were relatively low compared to the period before and after that. In addition, we also see a price jump on the evening of June 12th (entering June 13th), as the wind power was significantly low and since it was during nightime, there was no solar power to cover any loss.
 
 Therefore, to re-emphasise, the generation mix strongly relates to the price of the electricity; that is, renewable energy sources (with no generating cost) can bring the price of electricity down significantly, in contrast, coal and gas generators increase the price as it constantly needs to burn resources to produce electricity.
+
+## Merit-Order - Comparing the theoretical and actual price
+
+The goal is to analyse the theoretical price of electricity generated purely based on the supply and demand, with the price of the last generator dictating the market price.
