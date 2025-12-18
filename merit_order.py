@@ -8,10 +8,10 @@ import pandas as pd
 
 start_time = "2025/06/10 00:00:00"
 end_time = "2025/06/20 23:55:00"
-demand_table = "DISPATCHREGIONSUM" # the total demand of a region
 raw_data_cache = "./raw_data_cache"
 
-def get_demand(start_time, end_time):
+def get_demand(start_time, end_time, raw_data_cache):
+    demand_table = "DISPATCHREGIONSUM" # the total demand of a region
     demand_data = nemosis.dynamic_data_compiler(
         start_time, end_time, demand_table, raw_data_cache,
         select_columns=['SETTLEMENTDATE', 'REGIONID', 'TOTALDEMAND'],
@@ -25,7 +25,7 @@ def get_demand(start_time, end_time):
 
     return demand_data
 
-def get_supply(start_time, end_time):
+def get_supply(start_time, end_time, raw_data_cache):
     supply_table = "DISPATCHLOAD"
     supply_data = nemosis.dynamic_data_compiler(
         start_time, end_time, supply_table, raw_data_cache,
