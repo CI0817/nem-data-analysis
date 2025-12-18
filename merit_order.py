@@ -11,79 +11,74 @@ end_time = "2025/06/20 23:55:00"
 demand_table = "DISPATCHREGIONSUM" # the total demand of a region
 raw_data_cache = "./raw_data_cache"
 
-demand_data = nemosis.dynamic_data_compiler(
-    start_time, end_time, demand_table, raw_data_cache,
-    select_columns=['SETTLEMENTDATE', 'REGIONID', 'TOTALDEMAND'],
-    filter_cols=['REGIONID'], filter_values=[['VIC1']])
+def get_demand(start_time, end_time):
+    demand_data = nemosis.dynamic_data_compiler(
+        start_time, end_time, demand_table, raw_data_cache,
+        select_columns=['SETTLEMENTDATE', 'REGIONID', 'TOTALDEMAND'],
+        filter_cols=['REGIONID'], filter_values=[['VIC1']])
+      
+    # Convert the SETTLEMENTDATE to pd datetime object
+    demand_data['SETTLEMENTDATE'] = pd.to_datetime(demand_data['SETTLEMENTDATE'])
 
-# Convert the SETTLEMENTDATE to pd datetime object
-demand_data['SETTLEMENTDATE'] = pd.to_datetime(demand_data['SETTLEMENTDATE'])
+    # Set datetime as index
+    demand_data.set_index('SETTLEMENTDATE', inplace=True)
 
-# Set datetime as index
-demand_data.set_index('SETTLEMENTDATE', inplace=True)
+    return demand_data
 
-# print(demand_data)
+def get_supply(start_time, end_time):
+    supply_table = "DISPATCHLOAD"
+    supply_data = nemosis.dynamic_data_compiler(
+        start_time, end_time, supply_table, raw_data_cache,
+        select_columns=['SETTLEMENTDATE','DUID','AVAILABILITY', 'INTERVENTION'],
+        filter_cols=['INTERVENTION'], filter_values=[[0]])
 
-# Get the supply data
-supply_table = "DISPATCHLOAD"
-supply_data = nemosis.dynamic_data_compiler(
-    start_time, end_time, supply_table, raw_data_cache,
-    select_columns=['SETTLEMENTDATE','DUID','AVAILABILITY', 'INTERVENTION'],
-    filter_cols=['INTERVENTION'], filter_values=[[0]])
+    # Select only the settlementdate, duid, and availability
+    supply_data = supply_data[['SETTLEMENTDATE', 'DUID', 'AVAILABILITY']]
+    
+    # Keep only the generators that produce something
+    supply_data = supply_data[supply_data['AVAILABILITY'] > 0]
 
-# Select only the settlementdate, duid, and availability
-supply_data = supply_data[['SETTLEMENTDATE', 'DUID', 'AVAILABILITY']]
+    # Read the generator data from the given excel sheet
+    local_file = "./NEM Registration and Exemption List.xlsx"
+    gen_info = pd.read_excel(local_file, sheet_name="PU and Scheduled Loads")
 
-# print(supply_data)
+    # Get the Victorian generators
+    filtered_region = 'VIC1'
+    filtered_gen_info = gen_info[gen_info['Region'] == filtered_region]
 
-# Keep only the generators that produce something
-supply_data = supply_data[supply_data['AVAILABILITY'] > 0]
+    # Get the list of DUIDs in Victoria
+    vic_duids = filtered_gen_info['DUID'].tolist()
 
-# print(supply_data)
+    # Get the supply data that is only from Victorian generators
+    supply_data = supply_data[supply_data['DUID'].isin(vic_duids)]
 
-# Read the generator data from the given excel sheet
-local_file = "./NEM Registration and Exemption List.xlsx"
-gen_info = pd.read_excel(local_file, sheet_name="PU and Scheduled Loads")
+    # Get the fuel type and the duid, and join it with the supply data
+    fuel_type = filtered_gen_info[['DUID', 'Fuel Source - Primary']].set_index('DUID')
+    supply_data = supply_data.join(fuel_type, on='DUID')
 
-# Get the Victorian generators
-filtered_region = 'VIC1'
-filtered_gen_info = gen_info[gen_info['Region'] == filtered_region]
+    # Merge the supply available by fuel type
+    supply_merged = supply_data.groupby(['SETTLEMENTDATE', 'Fuel Source - Primary'])['AVAILABILITY'].sum().unstack(fill_value=0)
 
-# Get the list of DUIDs in Victoria
-vic_duids = filtered_gen_info['DUID'].tolist()
+    return supply_merged
 
-# print(vic_duids)
+def get_merit_order():
+    # Define the cost dictionary of each fuel type
+    # These numbers are quite arbitrary and fixed; in reality, these prices are dynamics and update every 5 mins or so.
+    # It's too complicated to model them dynamically for now.
+    merit_order = {
+        # Renewables
+        'Solar': 0,
+        'Wind': 0,
+        'Hydro': 45,
+        # Storage
+        'Battery Storage': 90,
+        # Fossils
+        'Fossil': 20,
+        'Brown Coal': 20,
+        'Black Coal': 55,
+        'Natural Gas': 300,
+        'Liquid Fuel': 500
+    }
 
-# Get the supply data that is only from Victorian generators
-supply_data = supply_data[supply_data['DUID'].isin(vic_duids)]
+    return merit_order
 
-# print(supply_data)
-
-# Get the fuel type and the duid, and join it with the supply data
-fuel_type = filtered_gen_info[['DUID', 'Fuel Source - Primary']].set_index('DUID')
-supply_data = supply_data.join(fuel_type, on='DUID')
-
-# print(supply_data)
-
-# Merge the supply available by fuel type
-supply_merged = supply_data.groupby(['SETTLEMENTDATE', 'Fuel Source - Primary'])['AVAILABILITY'].sum().unstack(fill_value=0)
-
-# print(supply_merged)
-
-# Define the cost dictionary of each fuel type
-# These numbers are quite arbitrary and fixed; in reality, these prices are dynamics and update every 5 mins or so.
-# It's too complicated to model them dynamically for now.
-merit_order = {
-    # Renewables
-    'Solar': 0,
-    'Wind': 0,
-    'Hydro': 45,
-    # Storage
-    'Battery Storage': 90,
-    # Fossils
-    'Fossil': 20,
-    'Brown Coal': 20,
-    'Black Coal': 55,
-    'Natural Gas': 300,
-    'Liquid Fuel': 500
-}
