@@ -67,11 +67,11 @@ def get_merit_order():
         # Renewables
         'Solar': 0,
         'Wind': 0,
-        'Hydro': 45,
+        'Hydro': 200,
         # Storage
-        'Battery Storage': 90,
+        'Battery Storage': 300,
         # Fossils
-        'Fossil': 20,
+        'Fossil': 150,
         'Brown Coal': 20,
         'Black Coal': 55,
         'Natural Gas': 300,
@@ -121,15 +121,23 @@ def plot_price(data, start_time, end_time):
     plt.plot(data.index, data['Simulated_Price'], color="orange", label="Simulated Price")
 
     # Format the plot
-    plt.title("Simulated Electricity Price")
+    start_date_str = pd.Timestamp(start_time).strftime('%Y-%m-%d')
+    end_date_str = pd.Timestamp(end_time).strftime('%Y-%m-%d')
+    if start_date_str == end_date_str:
+        plt.title(f"Simulated Electricity Price on {start_date_str}")
+        plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    else:
+        plt.title(f"Simulated Electricity Price between {start_date_str} and {end_date_str}")
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        plt.gcf().autofmt_xdate() # Rotate date labels
+
     plt.xlabel("Time")
     plt.ylabel("Price ($/MWh)")
     plt.xlim(pd.Timestamp(start_time), pd.Timestamp(end_time))
-    plt.axhline(0, color="red", linestyle="--", linewidth=1, label="Zero Price")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.show()
-
     plt.show()
 
 if __name__ == "__main__":
