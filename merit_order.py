@@ -65,3 +65,7 @@ supply_data = supply_data.join(fuel_type, on='DUID')
 
 # print(supply_data)
 
+# Merge the supply available by fuel type
+supply_merged = supply_data.groupby(['SETTLEMENTDATE', 'Fuel Source - Primary'])['AVAILABILITY'].sum().unstack(fill_value=0)
+
+print(supply_merged)
