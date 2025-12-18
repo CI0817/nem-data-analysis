@@ -68,4 +68,22 @@ supply_data = supply_data.join(fuel_type, on='DUID')
 # Merge the supply available by fuel type
 supply_merged = supply_data.groupby(['SETTLEMENTDATE', 'Fuel Source - Primary'])['AVAILABILITY'].sum().unstack(fill_value=0)
 
-print(supply_merged)
+# print(supply_merged)
+
+# Define the cost dictionary of each fuel type
+# These numbers are quite arbitrary and fixed; in reality, these prices are dynamics and update every 5 mins or so.
+# It's too complicated to model them dynamically for now.
+merit_order = {
+    # Renewables
+    'Solar': 0,
+    'Wind': 0,
+    'Hydro': 45,
+    # Storage
+    'Battery Storage': 90,
+    # Fossils
+    'Fossil': 20,
+    'Brown Coal': 20,
+    'Black Coal': 55,
+    'Natural Gas': 300,
+    'Liquid Fuel': 500
+}
