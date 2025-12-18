@@ -18,11 +18,22 @@ Additionally, if we look at the price by hour in June of 2025, we see that avera
 
 The goal is to visualise the generation mix and how it changes on average throughout the day.
 
-![Electricity Price (RRP) for VIC1 between 2025-06-01 and 2025-06-10](Figures/image.png)
-![Generation Mix for VIC1 between 2025-06-1 and 2025-06-10](Figures/image-4.png)
-![Electricity Price (RRP) for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-6.png)
-![Generation Mix for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-5.png)
+![Electricity Price (RRP) for VIC1 between 2025-06-01 and 2025-06-10](Figures/image-1.png)
+![Generation Mix for VIC1 between 2025-06-1 and 2025-06-10](Figures/image-2.png)
+![Electricity Price (RRP) for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-3.png)
+![Generation Mix for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-4.png)
 
 From the plots above, we can see a clear correlation between the generation mix and the spot price fluctuation. Looking back at the June 2025 case, in early June (6th to 10th), there was a strong wind power generation, and the RRP between that period were relatively low compared to the period before and after that. In addition, we also see a price jump on the evening of June 12th (entering June 13th), as the wind power was significantly low and since it was during nightime, there was no solar power to cover any loss.
 
 Therefore, to re-emphasise, the generation mix strongly relates to the price of the electricity; that is, renewable energy sources (with no generating cost) can bring the price of electricity down significantly, in contrast, coal and gas generators increase the price as it constantly needs to burn resources to produce electricity.
+
+## Merit-Order - Comparing the theoretical and actual price
+
+The goal is to analyse the theoretical price of electricity generated purely based on the supply and demand, with the price of the last generator dictating the market price.
+
+![Simulated Electricity Price in VIC1 between 2025-06-10 and 2025-06-20](Figures/image-5.png)
+![Electricity Price (RRP) for VIC1 between 2025-06-10 and 2025-06-20](Figures/image-6.png)
+![Simulated Electricity Price in VIC1 on 2025-06-20](Figures/image-7.png)
+![Electricity Price (RRP) for VIC1 on 2025-06-10](Figures/image-8.png)
+
+From the plot above, we see a very clear pattern between the simulated price and the actual price in the time period of June 2025. However, the shape of the price curves highlight the limitation of using fixed marginal costs. The simuated price appears as a rigid staircase curve, whereas the actual price shows alot more fluctuations; this is becuase we assumed that every generator type bids the exact same static price. This discrepency exists because the real-world generators employ strategic bidding by frequently adjusting their price band every 5 minutes based on the competitions and the grid conditions rather than usin a fixed value [[4]](https://www.aemo.com.au/-/media/files/electricity/nem/it-systems-and-change/2017/guide-to-ftp-energy-fcas.pdf?la=en)[[5]](https://www.aemo.com.au/-/media/files/electricity/nem/security_and_reliability/dispatch/policy_and_process/nem-operational-forecasting-and-dispatch-handbook-for-wind-and-solar-generators.pdf). Furthermore, the current simulation assumes no energy lost, but in reality, energy is lost as heat during transmission or conversion. These losses need to be taken into consideration in reality, as outlined by hte Australian Energy Market Committee (AEMC) [[6]](https://www.aemc.gov.au/sites/default/files/2019-03/Fact%20sheet%20marginal%20loss%20factors.pdf). Therefore, for future improvements, we need to incorporate dynamic bidding strategies and take into consideration the transmission losses.
