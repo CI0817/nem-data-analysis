@@ -5,10 +5,8 @@ This script plots the theoretical electricity price based on supply and demand a
 # Get the demand data in Victoria
 import nemosis
 import pandas as pd
-
-start_time = "2025/06/10 00:00:00"
-end_time = "2025/06/20 23:55:00"
-raw_data_cache = "./raw_data_cache"
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 def get_demand(start_time, end_time, raw_data_cache):
     demand_table = "DISPATCHREGIONSUM" # the total demand of a region
@@ -82,3 +80,64 @@ def get_merit_order():
 
     return merit_order
 
+def calculate_price(demand, supply, merit_order):
+    # Align data timestamps
+    common_index = demand.index.intersection(supply.index)
+    demand = demand.loc[common_index]
+    supply = supply.loc[common_index]
+
+    # Identify which fuels from our merit order exist in the actual data
+    available_fuels = [f for f in merit_order.keys() if f in supply.columns]
+
+    # Sort them by price (cheapest first)
+    sorted_stack = sorted(available_fuels, key=lambda x: merit_order[x])
+    
+    simulated_prices = []
+    
+    for timestamp in common_index:
+        current_demand = demand.loc[timestamp, 'TOTALDEMAND']
+        cumulative_supply = 0
+        cleared_price = 15000 # Default to market cap price if we run out of supply
+        
+        # Stack the generators
+        for fuel in sorted_stack:
+            fuel_avail = supply.loc[timestamp, fuel]
+            cumulative_supply += fuel_avail
+            
+            # If we have enough power to meet demand, this fuel sets the price
+            if cumulative_supply >= current_demand:
+                cleared_price = merit_order[fuel]
+                break
+        
+        simulated_prices.append(cleared_price)
+        
+    return pd.DataFrame({'Simulated_Price': simulated_prices}, index=common_index)
+
+def plot_price(data, start_time, end_time):
+    # Create a plot
+    plt.figure(figsize=(15, 6))
+
+    # Plot the simulated price
+    plt.plot(data.index, data['Simulated_Price'], color="orange", label="Simulated Price")
+
+    # Format the plot
+    plt.title("Simulated Electricity Price")
+    plt.xlabel("Time")
+    plt.ylabel("Price ($/MWh)")
+    plt.xlim(pd.Timestamp(start_time), pd.Timestamp(end_time))
+    plt.axhline(0, color="red", linestyle="--", linewidth=1, label="Zero Price")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
+    plt.show()
+
+if __name__ == "__main__":
+    start_time = "2025/06/10 00:00:00"
+    end_time = "2025/06/20 23:55:00"
+    raw_data_cache = "./raw_data_cache"
+    demand_data = get_demand(start_time, end_time, raw_data_cache)
+    supply_data = get_supply(start_time, end_time, raw_data_cache)
+    merit_order = get_merit_order()
+    price_data = calculate_price(demand_data, supply_data, merit_order)
+    plot_price(price_data, start_time, end_time)

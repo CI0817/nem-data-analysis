@@ -30,3 +30,5 @@ Therefore, to re-emphasise, the generation mix strongly relates to the price of 
 ## Merit-Order - Comparing the theoretical and actual price
 
 The goal is to analyse the theoretical price of electricity generated purely based on the supply and demand, with the price of the last generator dictating the market price.
+
+![alt text](image.png)
